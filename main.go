@@ -4,10 +4,12 @@ import (
 	"log"
 	"os"
 
+	"enity/zhoskiy-bench-go/controllers"
+	"enity/zhoskiy-bench-go/gorm"
+	"enity/zhoskiy-bench-go/validator"
+
 	"github.com/gofiber/fiber/v2"
 	"github.com/joho/godotenv"
-	"gorm.io/driver/mysql"
-	"gorm.io/gorm"
 )
 
 func main() {
@@ -20,12 +22,16 @@ func main() {
 	port := os.Getenv("APP_PORT")
 	app := fiber.New()
 
-	dsn := "root:123321@tcp(127.0.0.1:3306)/zhoskiy-bench-go?charset=utf8mb4&parseTime=True&loc=Local"
-	db, err := gorm.Open(mysql.Open(dsn), &gorm.Config{})
+	gorm.Init()
+	validator.Init()
 
-	if err != nil {
-		panic("failed to connect database")
-	}
+	setupRoutes(app)
 
 	log.Fatal(app.Listen(":" + port))
+}
+
+func setupRoutes(app *fiber.App) {
+	app.Get("api/plaintext", controllers.Plaintext)
+	app.Get("api/read-data", controllers.ReadData)
+	app.Post("api/create-data", controllers.CreateData)
 }
